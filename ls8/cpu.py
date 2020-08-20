@@ -105,51 +105,68 @@ class CPU:
     def run(self):
         """Run the CPU."""
         LDI = 0b10000010
-        PRN = 0b01000111
-        HLT = 0b00000001
-        MUL = 0b10100010
-        PUSH = 0b01000101
-        POP = 0b01000110
+        PRN = 0b01000111 # Print
+        HLT = 0b00000001 # Halt
+        MUL = 0b10100010 # Multiply
+        ADD = 0b10100000 # Addition
+        PUSH = 0b01000101 # Push on stack
+        POP = 0b01000110 # Pop from stack
+        CALL = 0b01010000
+        RET = 0b00010001
 
         running = True
 
         while running:
             # Instruction register
-            IR = self.ram_read(self.pc)
+            ir = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
-            if IR == HLT:
+            if ir == HLT:
                 running = False
                 self.pc += 1
 
-            elif IR == LDI:
+            elif ir == LDI:
                 self.ldi(operand_a, operand_b)
                 self.pc += 3
 
-            elif IR == PRN:
+            elif ir == PRN:
                 self.prn(operand_a)
                 self.pc += 2
                 
-            elif IR == MUL:
+            elif ir == MUL:
                 print(self.reg[operand_a] * self.reg[operand_b])
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
                 
-            elif IR == PUSH:
+            elif ir == PUSH:
                 self.reg[7] -= 1
                 sp = self.reg[7]
                 value = self.reg[operand_a]
                 self.ram[sp] = value
                 self.pc += 2
                 
-            elif IR == POP:
+            elif ir == POP:
                 sp = self.reg[7]
                 value = self.ram[sp]
                 self.reg[operand_a] = value
                 self.reg[7] += 1
                 self.pc += 2
+                
+            elif ir == CALL:
+                address = self.reg[opperand_a]
+                requested = self.pc + 2
+                self.reg[7] -= 1
+                sp = self.reg[7]
+                self.ram[sp] = requested
+                self.pc = address
+                
+            elif ir == RET:
+                sp = self.reg[7]
+                requested = self.ram[sp]
+                self.reg[7] += 1
+                self.pc = requested
 
             else:
-                print(f"Bad input: {bin(IR)}")
+                print(f"Bad input: {bin(ir)}")
                 running = False
