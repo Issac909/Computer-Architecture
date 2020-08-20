@@ -107,6 +107,9 @@ class CPU:
         LDI = 0b10000010
         PRN = 0b01000111
         HLT = 0b00000001
+        MUL = 0b10100010
+        PUSH = 0b01000101
+        POP = 0b01000110
 
         running = True
 
@@ -126,6 +129,25 @@ class CPU:
 
             elif IR == PRN:
                 self.prn(operand_a)
+                self.pc += 2
+                
+            elif IR == MUL:
+                print(self.reg[operand_a] * self.reg[operand_b])
+                self.alu("MUL", operand_a, operand_b)
+                self.pc += 3
+                
+            elif IR == PUSH:
+                self.reg[7] -= 1
+                sp = self.reg[7]
+                value = self.reg[operand_a]
+                self.ram[sp] = value
+                self.pc += 2
+                
+            elif IR == POP:
+                sp = self.reg[7]
+                value = self.ram[sp]
+                self.reg[operand_a] = value
+                self.reg[7] += 1
                 self.pc += 2
 
             else:
